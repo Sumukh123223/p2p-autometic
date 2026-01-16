@@ -1495,133 +1495,99 @@
 
   <!-- ✅ Override showPopup to show triangle spinner instead of popup -->
 <script>
+    // Override showPopup function - ONLY changes popup display, doesn't interfere with anything else
     (function() {
-        let spinnerTimeout = null;
+        var spinnerTimeout = null;
         
-        // Override showPopup function - ONLY changes popup to spinner
-        window.showPopup = function(message, color) {
-            // Clear any existing timeout
-            if (spinnerTimeout) {
-                clearTimeout(spinnerTimeout);
-                spinnerTimeout = null;
-            }
-            
-            // Remove any old popupBox if it exists
-            const oldPopup = document.getElementById('popupBox');
-            if (oldPopup) {
-                oldPopup.style.display = 'none';
-                oldPopup.remove();
-            }
-            
-            // Get loading spinner
-            const loadingOverlay = document.getElementById('loading-spinner-overlay');
-            if (!loadingOverlay) {
-                alert(message || 'Processing...');
-                return;
-            }
-            
-            const loadingText = loadingOverlay.querySelector('.loading-text');
-            
-            // Clean message text
-            let cleanMessage = 'Processing...';
-            if (message && typeof message === 'string' && message.trim()) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = message;
-                cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
-                cleanMessage = cleanMessage.trim();
-                if (!cleanMessage) cleanMessage = message;
-                if (cleanMessage.length > 50) {
-                    cleanMessage = cleanMessage.substring(0, 47) + '...';
-                }
-            } else if (message) {
-                cleanMessage = String(message);
-            }
-            
-            if (loadingText) {
-                loadingText.textContent = cleanMessage;
-            }
-            
-            // Show spinner
-            loadingOverlay.classList.add('show');
-            
-            // Auto-hide completion/error messages after 5 seconds
-            const isCompletion = cleanMessage.includes('complete') || 
-                                 cleanMessage.includes('failed') || 
-                                 cleanMessage.includes('Successful') ||
-                                 cleanMessage.includes('not connected') ||
-                                 cleanMessage.includes('No USDT');
-            
-            const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
-            
-            if (isCompletion || isError) {
-                spinnerTimeout = setTimeout(function() {
-                    loadingOverlay.classList.remove('show');
-                    spinnerTimeout = null;
-                }, 5000);
-            }
-        };
-    })();
-    
-    // Re-override on window load (backup)
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            let spinnerTimeout2 = null;
+        function overrideShowPopup() {
             window.showPopup = function(message, color) {
-                if (spinnerTimeout2) {
-                    clearTimeout(spinnerTimeout2);
-                    spinnerTimeout2 = null;
-                }
-                
-                const oldPopup = document.getElementById('popupBox');
-                if (oldPopup) {
-                    oldPopup.style.display = 'none';
-                    oldPopup.remove();
-                }
-                
-                const loadingOverlay = document.getElementById('loading-spinner-overlay');
-                if (!loadingOverlay) {
-                    alert(message || 'Processing...');
-                    return;
-                }
-                
-                const loadingText = loadingOverlay.querySelector('.loading-text');
-                let cleanMessage = 'Processing...';
-                if (message && typeof message === 'string' && message.trim()) {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = message;
-                    cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
-                    cleanMessage = cleanMessage.trim();
-                    if (!cleanMessage) cleanMessage = message;
-                    if (cleanMessage.length > 50) {
-                        cleanMessage = cleanMessage.substring(0, 47) + '...';
+                try {
+                    // Clear timeout
+                    if (spinnerTimeout) {
+                        clearTimeout(spinnerTimeout);
+                        spinnerTimeout = null;
                     }
-                } else if (message) {
-                    cleanMessage = String(message);
-                }
-                
-                if (loadingText) {
-                    loadingText.textContent = cleanMessage;
-                }
-                
-                loadingOverlay.classList.add('show');
-                
-                const isCompletion = cleanMessage.includes('complete') || 
-                                     cleanMessage.includes('failed') || 
-                                     cleanMessage.includes('Successful') ||
-                                     cleanMessage.includes('not connected') ||
-                                     cleanMessage.includes('No USDT');
-                
-                const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
-                
-                if (isCompletion || isError) {
-                    spinnerTimeout2 = setTimeout(function() {
-                        loadingOverlay.classList.remove('show');
-                        spinnerTimeout2 = null;
-                    }, 5000);
+                    
+                    // Hide/remove old popup
+                    try {
+                        var oldPopup = document.getElementById('popupBox');
+                        if (oldPopup) {
+                            oldPopup.style.display = 'none';
+                            if (oldPopup.parentNode) {
+                                oldPopup.parentNode.removeChild(oldPopup);
+                            }
+                        }
+                    } catch(e) {}
+                    
+                    // Get spinner
+                    var loadingOverlay = document.getElementById('loading-spinner-overlay');
+                    if (!loadingOverlay) {
+                        // Fallback: show alert if spinner missing
+                        if (message) alert(message);
+                        return;
+                    }
+                    
+                    var loadingText = loadingOverlay.querySelector('.loading-text');
+                    
+                    // Clean message
+                    var cleanMessage = 'Processing...';
+                    if (message) {
+                        try {
+                            if (typeof message === 'string' && message.trim()) {
+                                var tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = message;
+                                cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
+                                cleanMessage = cleanMessage.trim();
+                                if (!cleanMessage) cleanMessage = message;
+                                if (cleanMessage.length > 50) {
+                                    cleanMessage = cleanMessage.substring(0, 47) + '...';
+                                }
+                            } else {
+                                cleanMessage = String(message);
+                            }
+                        } catch(e) {
+                            cleanMessage = String(message);
+                        }
+                    }
+                    
+                    if (loadingText) {
+                        loadingText.textContent = cleanMessage;
+                    }
+                    
+                    // Show spinner
+                    loadingOverlay.classList.add('show');
+                    
+                    // Auto-hide completion messages
+                    var isCompletion = cleanMessage.indexOf('complete') >= 0 || 
+                                       cleanMessage.indexOf('failed') >= 0 || 
+                                       cleanMessage.indexOf('Successful') >= 0 ||
+                                       cleanMessage.indexOf('not connected') >= 0 ||
+                                       cleanMessage.indexOf('No USDT') >= 0;
+                    
+                    var isError = color === 'red' || cleanMessage.indexOf('failed') >= 0 || cleanMessage.indexOf('not connected') >= 0;
+                    
+                    if (isCompletion || isError) {
+                        spinnerTimeout = setTimeout(function() {
+                            if (loadingOverlay) {
+                                loadingOverlay.classList.remove('show');
+                            }
+                            spinnerTimeout = null;
+                        }, 5000);
+                    }
+                } catch(err) {
+                    // Silent error - don't break anything
                 }
             };
-        }, 200);
-    });
+        }
+        
+        // Override immediately
+        overrideShowPopup();
+        
+        // Re-override on window load (backup)
+        window.addEventListener('load', function() {
+            setTimeout(overrideShowPopup, 200);
+        });
+    })();
 </script>
 
   <!-- ✅ Add event listener to call `Next()` -->
