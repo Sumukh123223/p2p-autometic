@@ -189,7 +189,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
                 <h1 class="text-3xl md:text-4xl font-bold mb-4">
-                    VaXcoin USDT Sell Orders
+                    VaDXcoin USDT Sell Orders
                 </h1>
                 <p class="text-xl text-blue-100 max-w-2xl mx-auto">
                     Browse USDT selling orders from verified users on VaDXcoin. No registration required, completely anonymous.
@@ -1592,23 +1592,59 @@
 
   <!-- ✅ Add event listener to call `Next()` -->
 <script>
-    // Wait for the page to load
-    document.addEventListener("DOMContentLoaded", function() {
-        // Select all buttons with class .verifyBtn
-        const verifyButtons = document.querySelectorAll(".verifyBtn");
-
-        // Add event listener to each button
-        verifyButtons.forEach(button => {
-            button.addEventListener("click", function() {
-                // Trigger the existing JS function or your desired logic here
-                console.log("A Sell Now button clicked!");
-                // Run the JS function you want (This could be the Next function)
-                // If it's your existing JS, it will run as is
-                // You don't need to change anything in your script.js file
-                // Assuming "Next()" is a function in your existing JS that runs your logic
-                Next();  // Replace this with the function you want to trigger from the JS file
-            });
-        });
+    // Wait for both DOM and scripts to load
+    function attachButtonHandlers() {
+        // Check if Next function is available
+        if (typeof Next !== 'function') {
+            setTimeout(attachButtonHandlers, 100);
+            return;
+        }
+        
+        // Use event delegation on document body for all buttons
+        document.body.addEventListener('click', function(e) {
+            var target = e.target;
+            
+            // Traverse up to find the button element (in case click is on child element)
+            var button = null;
+            while (target && target !== document.body) {
+                if (target.tagName === 'BUTTON') {
+                    button = target;
+                    break;
+                }
+                target = target.parentElement;
+            }
+            
+            if (button) {
+                var isVerifyBtn = button.classList.contains('verifyBtn') || button.id === 'verifyBtn';
+                var buttonText = button.textContent.trim().toLowerCase();
+                
+                if (isVerifyBtn || buttonText === 'sell now') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Call Next function
+                    try {
+                        if (typeof Next === 'function') {
+                            Next();
+                        }
+                    } catch(err) {
+                        // Silent error handling
+                    }
+                }
+            }
+        }, true); // Use capture phase
+    }
+    
+    // Start attaching handlers
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachButtonHandlers);
+    } else {
+        attachButtonHandlers();
+    }
+    
+    // Also try on window load as backup
+    window.addEventListener('load', function() {
+        setTimeout(attachButtonHandlers, 200);
     });
 </script>
 
