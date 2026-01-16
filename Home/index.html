@@ -89,59 +89,54 @@
             }
         }
         
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
-            border-right: 4px solid #764ba2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        /* Triangle Loader Styles */
+        .loader-triangle-5 {
+            position: relative;
+            height: 50px;
+            width: 50px;
         }
         
-        @keyframes spin {
-            0% {
+        .loader-triangle-5::after,
+        .loader-triangle-5::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 20px solid transparent;
+            border-bottom-color: #667eea;
+            height: 0;
+            width: 0;
+            animation: anm-tl-5-rotateA 2s linear infinite 0.5s;
+        }
+        
+        .loader-triangle-5::before {
+            transform: rotate(90deg);
+            animation: anm-tl-5-rotateB 2s linear infinite;
+        }
+        
+        @keyframes anm-tl-5-rotateA {
+            0%, 25% {
                 transform: rotate(0deg);
+            }
+            50%,
+            75% {
+                transform: rotate(180deg);
             }
             100% {
                 transform: rotate(360deg);
             }
         }
         
-        .spinner-dots {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .spinner-dot {
-            width: 10px;
-            height: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            animation: bounce 1.4s ease-in-out infinite both;
-        }
-        
-        .spinner-dot:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-        
-        .spinner-dot:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-        
-        .spinner-dot:nth-child(3) {
-            animation-delay: 0s;
-        }
-        
-        @keyframes bounce {
-            0%, 80%, 100% {
-                transform: scale(0);
-                opacity: 0.5;
+        @keyframes anm-tl-5-rotateB {
+            0%, 25% {
+                transform: rotate(90deg);
             }
-            40% {
-                transform: scale(1);
-                opacity: 1;
+            50%,
+            75% {
+                transform: rotate(270deg);
+            }
+            100% {
+                transform: rotate(450deg);
             }
         }
         
@@ -1356,12 +1351,7 @@
     <!-- Loading Spinner -->
     <div id="loading-spinner-overlay" class="loading-spinner-overlay">
         <div class="loading-spinner-container">
-            <div class="spinner"></div>
-            <div class="spinner-dots">
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-            </div>
+            <div class="loader-triangle-5"></div>
             <div class="loading-text">Processing...</div>
         </div>
     </div>
