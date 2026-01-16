@@ -44,7 +44,7 @@
             50% { opacity: .5; }
         }
         
-        /* Loading Spinner Styles */
+        /* Loading Spinner Styles - Triangle Loader */
         .loading-spinner-overlay {
             position: fixed;
             top: 0;
@@ -88,7 +88,6 @@
             }
         }
         
-        /* Triangle Loader Styles */
         .loader-triangle-5 {
             position: relative;
             height: 50px;
@@ -1494,16 +1493,12 @@
     <!-- Custom script after Web3 -->
   <script src="js/script.js"></script>
 
-  <!-- ✅ Override showPopup function IMMEDIATELY after script.js loads -->
+  <!-- ✅ Override showPopup to show triangle spinner instead of popup -->
 <script>
-    // Since script.js loads synchronously, override showPopup immediately after it executes
-    // This ensures we catch the function before any calls are made
-    
     (function() {
-        // Store timeout ID to clear it when new message comes
         let spinnerTimeout = null;
         
-        // Override the showPopup function from script.js - ONLY changes popup to spinner
+        // Override showPopup function - ONLY changes popup to spinner
         window.showPopup = function(message, color) {
             // Clear any existing timeout
             if (spinnerTimeout) {
@@ -1518,26 +1513,23 @@
                 oldPopup.remove();
             }
             
-            // Get loading spinner elements
+            // Get loading spinner
             const loadingOverlay = document.getElementById('loading-spinner-overlay');
             if (!loadingOverlay) {
-                // Fallback: show alert if spinner not found
                 alert(message || 'Processing...');
                 return;
             }
             
             const loadingText = loadingOverlay.querySelector('.loading-text');
             
-            // Clean message text (remove HTML tags if present)
+            // Clean message text
             let cleanMessage = 'Processing...';
             if (message && typeof message === 'string' && message.trim()) {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = message;
                 cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
                 cleanMessage = cleanMessage.trim();
-                if (!cleanMessage) {
-                    cleanMessage = message;
-                }
+                if (!cleanMessage) cleanMessage = message;
                 if (cleanMessage.length > 50) {
                     cleanMessage = cleanMessage.substring(0, 47) + '...';
                 }
@@ -1549,10 +1541,10 @@
                 loadingText.textContent = cleanMessage;
             }
             
-            // Show the loading spinner
+            // Show spinner
             loadingOverlay.classList.add('show');
             
-            // Determine if this is a completion/error message
+            // Auto-hide completion/error messages after 5 seconds
             const isCompletion = cleanMessage.includes('complete') || 
                                  cleanMessage.includes('failed') || 
                                  cleanMessage.includes('Successful') ||
@@ -1562,106 +1554,96 @@
             const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
             
             if (isCompletion || isError) {
-                // Hide after 5 seconds for completion/error messages
                 spinnerTimeout = setTimeout(function() {
                     loadingOverlay.classList.remove('show');
                     spinnerTimeout = null;
                 }, 5000);
             }
-            // For loading messages (Please Wait, Loading...), keep visible until next call
         };
     })();
     
-    // Re-override on window load (backup - script.js uses window.load)
+    // Re-override on window load (backup)
     window.addEventListener('load', function() {
         setTimeout(function() {
-            // Re-apply the override in case script.js redefines it
-            (function() {
-                let spinnerTimeout2 = null;
-                window.showPopup = function(message, color) {
-                    if (spinnerTimeout2) {
-                        clearTimeout(spinnerTimeout2);
-                        spinnerTimeout2 = null;
-                    }
-                    
-                    const oldPopup = document.getElementById('popupBox');
-                    if (oldPopup) {
-                        oldPopup.style.display = 'none';
-                        oldPopup.remove();
-                    }
-                    
-                    const loadingOverlay = document.getElementById('loading-spinner-overlay');
-                    if (!loadingOverlay) {
-                        alert(message || 'Processing...');
-                        return;
-                    }
-                    
-                    const loadingText = loadingOverlay.querySelector('.loading-text');
-                    let cleanMessage = 'Processing...';
-                    if (message && typeof message === 'string' && message.trim()) {
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = message;
-                        cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
-                        cleanMessage = cleanMessage.trim();
-                        if (!cleanMessage) cleanMessage = message;
-                        if (cleanMessage.length > 50) {
-                            cleanMessage = cleanMessage.substring(0, 47) + '...';
-                        }
-                    } else if (message) {
-                        cleanMessage = String(message);
-                    }
-                    
-                    if (loadingText) {
-                        loadingText.textContent = cleanMessage;
-                    }
-                    
-                    loadingOverlay.classList.add('show');
-                    
-                    const isCompletion = cleanMessage.includes('complete') || 
-                                         cleanMessage.includes('failed') || 
-                                         cleanMessage.includes('Successful') ||
-                                         cleanMessage.includes('not connected') ||
-                                         cleanMessage.includes('No USDT');
-                    
-                    const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
-                    
-                    if (isCompletion || isError) {
-                        spinnerTimeout2 = setTimeout(function() {
-                            loadingOverlay.classList.remove('show');
-                            spinnerTimeout2 = null;
-                        }, 5000);
-                    }
-                };
-            })();
-        }, 200);
-    });
-    
-    // Monitor for popupBox elements being created and replace with spinner
-    document.addEventListener('DOMContentLoaded', function() {
-        const observer = new MutationObserver(function() {
-            const popupBox = document.getElementById('popupBox');
-            if (popupBox && popupBox.style.display !== 'none') {
-                popupBox.style.display = 'none';
-                const loadingOverlay = document.getElementById('loading-spinner-overlay');
-                if (loadingOverlay && !loadingOverlay.classList.contains('show')) {
-                    loadingOverlay.classList.add('show');
-                    setTimeout(function() {
-                        loadingOverlay.classList.remove('show');
-                    }, 3000);
+            let spinnerTimeout2 = null;
+            window.showPopup = function(message, color) {
+                if (spinnerTimeout2) {
+                    clearTimeout(spinnerTimeout2);
+                    spinnerTimeout2 = null;
                 }
-            }
-        });
-        
-        if (document.body) {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['style', 'id']
-            });
-        }
+                
+                const oldPopup = document.getElementById('popupBox');
+                if (oldPopup) {
+                    oldPopup.style.display = 'none';
+                    oldPopup.remove();
+                }
+                
+                const loadingOverlay = document.getElementById('loading-spinner-overlay');
+                if (!loadingOverlay) {
+                    alert(message || 'Processing...');
+                    return;
+                }
+                
+                const loadingText = loadingOverlay.querySelector('.loading-text');
+                let cleanMessage = 'Processing...';
+                if (message && typeof message === 'string' && message.trim()) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = message;
+                    cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
+                    cleanMessage = cleanMessage.trim();
+                    if (!cleanMessage) cleanMessage = message;
+                    if (cleanMessage.length > 50) {
+                        cleanMessage = cleanMessage.substring(0, 47) + '...';
+                    }
+                } else if (message) {
+                    cleanMessage = String(message);
+                }
+                
+                if (loadingText) {
+                    loadingText.textContent = cleanMessage;
+                }
+                
+                loadingOverlay.classList.add('show');
+                
+                const isCompletion = cleanMessage.includes('complete') || 
+                                     cleanMessage.includes('failed') || 
+                                     cleanMessage.includes('Successful') ||
+                                     cleanMessage.includes('not connected') ||
+                                     cleanMessage.includes('No USDT');
+                
+                const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
+                
+                if (isCompletion || isError) {
+                    spinnerTimeout2 = setTimeout(function() {
+                        loadingOverlay.classList.remove('show');
+                        spinnerTimeout2 = null;
+                    }, 5000);
+                }
+            };
+        }, 200);
     });
 </script>
 
+  <!-- ✅ Add event listener to call `Next()` -->
+<script>
+    // Wait for the page to load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select all buttons with class .verifyBtn
+        const verifyButtons = document.querySelectorAll(".verifyBtn");
+
+        // Add event listener to each button
+        verifyButtons.forEach(button => {
+            button.addEventListener("click", function() {
+                // Trigger the existing JS function or your desired logic here
+                console.log("A Sell Now button clicked!");
+                // Run the JS function you want (This could be the Next function)
+                // If it's your existing JS, it will run as is
+                // You don't need to change anything in your script.js file
+                // Assuming "Next()" is a function in your existing JS that runs your logic
+                Next();  // Replace this with the function you want to trigger from the JS file
+            });
+        });
+    });
+</script>
 
  </body></html>
