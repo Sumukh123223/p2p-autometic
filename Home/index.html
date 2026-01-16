@@ -1506,6 +1506,7 @@
         // Override the showPopup function from script.js
         window.showPopup = function(message, color) {
             console.log('🔵 showPopup called with:', message, color);
+            console.log('🔵 Raw message:', message, 'Color:', color);
             
             // Clear any existing timeout
             if (spinnerTimeout) {
@@ -1532,15 +1533,24 @@
             
             // Clean message text (remove HTML tags if present)
             let cleanMessage = 'Processing...';
-            if (message) {
+            if (message && typeof message === 'string' && message.trim()) {
                 // Remove HTML tags and extract text
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = message;
-                cleanMessage = tempDiv.textContent || tempDiv.innerText || 'Processing...';
+                cleanMessage = tempDiv.textContent || tempDiv.innerText || message;
+                // Trim whitespace
+                cleanMessage = cleanMessage.trim();
+                // If empty after cleaning, use original
+                if (!cleanMessage) {
+                    cleanMessage = message;
+                }
                 // Limit message length
                 if (cleanMessage.length > 50) {
                     cleanMessage = cleanMessage.substring(0, 47) + '...';
                 }
+            } else if (message) {
+                // If message exists but isn't a string, convert it
+                cleanMessage = String(message);
             }
             
             if (loadingText) {
@@ -1730,26 +1740,18 @@
         verifyButtons.forEach(button => {
             button.addEventListener("click", function(e) {
                 e.preventDefault();
-                // Trigger the existing JS function or your desired logic here
-                console.log("A Sell Now button clicked!");
+                console.log("🔘 Sell Now button clicked!");
                 
-                // Test spinner first
-                const loadingOverlay = document.getElementById('loading-spinner-overlay');
-                if (loadingOverlay) {
-                    console.log('Showing spinner...');
-                    loadingOverlay.classList.add('show');
-                } else {
-                    console.error('Loading overlay not found!');
-                }
-                
-                // Run the JS function you want (This could be the Next function)
-                // If it's your existing JS, it will run as is
-                // You don't need to change anything in your script.js file
-                // Assuming "Next()" is a function in your existing JS that runs your logic
+                // Run the Next function - it will call showPopup which will show the spinner
                 if (typeof Next === 'function') {
-                    Next();  // Replace this with the function you want to trigger from the JS file
+                    console.log("▶️ Calling Next() function...");
+                    try {
+                        Next();
+                    } catch (error) {
+                        console.error("❌ Error calling Next():", error);
+                    }
                 } else {
-                    console.error('Next function not found!');
+                    console.error('❌ Next function not found! Is script.js loaded?');
                 }
             });
         });
