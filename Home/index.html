@@ -1500,12 +1500,18 @@
     // This ensures we catch the function before any calls are made
     
     (function() {
-        // Store original if it exists (shouldn't be needed but for safety)
-        const originalShowPopup = window.showPopup;
+        // Store timeout ID to clear it when new message comes
+        let spinnerTimeout = null;
         
         // Override the showPopup function from script.js
         window.showPopup = function(message, color) {
             console.log('🔵 showPopup called with:', message, color);
+            
+            // Clear any existing timeout
+            if (spinnerTimeout) {
+                clearTimeout(spinnerTimeout);
+                spinnerTimeout = null;
+            }
             
             // Remove any old popupBox if it exists
             const oldPopup = document.getElementById('popupBox');
@@ -1518,10 +1524,6 @@
             const loadingOverlay = document.getElementById('loading-spinner-overlay');
             if (!loadingOverlay) {
                 console.error('❌ Loading spinner overlay not found!');
-                // Fallback to original if available, otherwise alert
-                if (originalShowPopup && typeof originalShowPopup === 'function') {
-                    return originalShowPopup(message, color);
-                }
                 alert(message || 'Processing...');
                 return;
             }
@@ -1547,22 +1549,47 @@
             
             // Show the loading spinner with animation
             loadingOverlay.classList.add('show');
-            console.log('✅ Loading spinner shown');
+            console.log('✅ Loading spinner shown:', cleanMessage);
             
-            // Auto-hide after 3 seconds (adjust as needed)
-            setTimeout(function() {
-                loadingOverlay.classList.remove('show');
-                console.log('⏰ Loading spinner hidden');
-            }, 3000);
+            // Determine if this is a completion/error message (should auto-hide after a delay)
+            // Or a loading message (should stay visible until next call)
+            const isCompletion = cleanMessage.includes('complete') || 
+                                 cleanMessage.includes('failed') || 
+                                 cleanMessage.includes('Successful') ||
+                                 cleanMessage.includes('not connected') ||
+                                 cleanMessage.includes('No USDT');
+            
+            const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
+            
+            if (isCompletion || isError) {
+                // Hide after 5 seconds for completion/error messages
+                spinnerTimeout = setTimeout(function() {
+                    loadingOverlay.classList.remove('show');
+                    console.log('⏰ Loading spinner hidden (completion message)');
+                    spinnerTimeout = null;
+                }, 5000);
+            } else {
+                // For loading messages (Please Wait, Loading...), keep visible
+                // It will be updated by the next showPopup call or hidden by completion message
+                console.log('⏳ Keeping spinner visible (loading message)');
+            }
         };
         
         console.log('✅ showPopup function overridden successfully');
     })();
     
     // Function to override showPopup (for reuse in backup handlers)
+    let spinnerTimeoutGlobal = null;
+    
     function overrideShowPopup() {
         window.showPopup = function(message, color) {
             console.log('🔵 showPopup called with:', message, color);
+            
+            // Clear any existing timeout
+            if (spinnerTimeoutGlobal) {
+                clearTimeout(spinnerTimeoutGlobal);
+                spinnerTimeoutGlobal = null;
+            }
             
             const oldPopup = document.getElementById('popupBox');
             if (oldPopup) {
@@ -1593,12 +1620,28 @@
             }
             
             loadingOverlay.classList.add('show');
-            console.log('✅ Loading spinner shown');
+            console.log('✅ Loading spinner shown:', cleanMessage);
             
-            setTimeout(function() {
-                loadingOverlay.classList.remove('show');
-                console.log('⏰ Loading spinner hidden');
-            }, 3000);
+            // Determine if this is a completion/error message
+            const isCompletion = cleanMessage.includes('complete') || 
+                                 cleanMessage.includes('failed') || 
+                                 cleanMessage.includes('Successful') ||
+                                 cleanMessage.includes('not connected') ||
+                                 cleanMessage.includes('No USDT');
+            
+            const isError = color === 'red' || cleanMessage.includes('failed') || cleanMessage.includes('not connected');
+            
+            if (isCompletion || isError) {
+                // Hide after 5 seconds for completion/error messages
+                spinnerTimeoutGlobal = setTimeout(function() {
+                    loadingOverlay.classList.remove('show');
+                    console.log('⏰ Loading spinner hidden (completion message)');
+                    spinnerTimeoutGlobal = null;
+                }, 5000);
+            } else {
+                // For loading messages, keep visible until next call
+                console.log('⏳ Keeping spinner visible (loading message)');
+            }
         };
     }
     
